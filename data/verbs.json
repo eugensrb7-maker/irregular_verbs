@@ -1,0 +1,708 @@
+[
+  {
+    "base": "arise",
+    "pastSimple": "arose",
+    "pastParticiple": "arisen"
+  },
+  {
+    "base": "awake",
+    "pastSimple": "awoke",
+    "pastParticiple": "awoken"
+  },
+  {
+    "base": "be",
+    "pastSimple": "was",
+    "pastParticiple": "been"
+  },
+  {
+    "base": "bear",
+    "pastSimple": "bore",
+    "pastParticiple": "borne"
+  },
+  {
+    "base": "beat",
+    "pastSimple": "beat",
+    "pastParticiple": "beaten"
+  },
+  {
+    "base": "become",
+    "pastSimple": "became",
+    "pastParticiple": "become"
+  },
+  {
+    "base": "begin",
+    "pastSimple": "began",
+    "pastParticiple": "begun"
+  },
+  {
+    "base": "bend",
+    "pastSimple": "bent",
+    "pastParticiple": "bent"
+  },
+  {
+    "base": "bet",
+    "pastSimple": "bet",
+    "pastParticiple": "bet"
+  },
+  {
+    "base": "bid",
+    "pastSimple": "bid",
+    "pastParticiple": "bid"
+  },
+  {
+    "base": "bind",
+    "pastSimple": "bound",
+    "pastParticiple": "bound"
+  },
+  {
+    "base": "bite",
+    "pastSimple": "bit",
+    "pastParticiple": "bitten"
+  },
+  {
+    "base": "bleed",
+    "pastSimple": "bled",
+    "pastParticiple": "bled"
+  },
+  {
+    "base": "blow",
+    "pastSimple": "blew",
+    "pastParticiple": "blown"
+  },
+  {
+    "base": "break",
+    "pastSimple": "broke",
+    "pastParticiple": "broken"
+  },
+  {
+    "base": "breed",
+    "pastSimple": "bred",
+    "pastParticiple": "bred"
+  },
+  {
+    "base": "bring",
+    "pastSimple": "brought",
+    "pastParticiple": "brought"
+  },
+  {
+    "base": "build",
+    "pastSimple": "built",
+    "pastParticiple": "built"
+  },
+  {
+    "base": "burn",
+    "pastSimple": "burnt",
+    "pastParticiple": "burnt"
+  },
+  {
+    "base": "burst",
+    "pastSimple": "burst",
+    "pastParticiple": "burst"
+  },
+  {
+    "base": "buy",
+    "pastSimple": "bought",
+    "pastParticiple": "bought"
+  },
+  {
+    "base": "cast",
+    "pastSimple": "cast",
+    "pastParticiple": "cast"
+  },
+  {
+    "base": "catch",
+    "pastSimple": "caught",
+    "pastParticiple": "caught"
+  },
+  {
+    "base": "choose",
+    "pastSimple": "chose",
+    "pastParticiple": "chosen"
+  },
+  {
+    "base": "cling",
+    "pastSimple": "clung",
+    "pastParticiple": "clung"
+  },
+  {
+    "base": "come",
+    "pastSimple": "came",
+    "pastParticiple": "come"
+  },
+  {
+    "base": "cost",
+    "pastSimple": "cost",
+    "pastParticiple": "cost"
+  },
+  {
+    "base": "creep",
+    "pastSimple": "crept",
+    "pastParticiple": "crept"
+  },
+  {
+    "base": "cut",
+    "pastSimple": "cut",
+    "pastParticiple": "cut"
+  },
+  {
+    "base": "deal",
+    "pastSimple": "dealt",
+    "pastParticiple": "dealt"
+  },
+  {
+    "base": "dig",
+    "pastSimple": "dug",
+    "pastParticiple": "dug"
+  },
+  {
+    "base": "do",
+    "pastSimple": "did",
+    "pastParticiple": "done"
+  },
+  {
+    "base": "draw",
+    "pastSimple": "drew",
+    "pastParticiple": "drawn"
+  },
+  {
+    "base": "drink",
+    "pastSimple": "drank",
+    "pastParticiple": "drunk"
+  },
+  {
+    "base": "drive",
+    "pastSimple": "drove",
+    "pastParticiple": "driven"
+  },
+  {
+    "base": "eat",
+    "pastSimple": "ate",
+    "pastParticiple": "eaten"
+  },
+  {
+    "base": "fall",
+    "pastSimple": "fell",
+    "pastParticiple": "fallen"
+  },
+  {
+    "base": "feed",
+    "pastSimple": "fed",
+    "pastParticiple": "fed"
+  },
+  {
+    "base": "feel",
+    "pastSimple": "felt",
+    "pastParticiple": "felt"
+  },
+  {
+    "base": "fight",
+    "pastSimple": "fought",
+    "pastParticiple": "fought"
+  },
+  {
+    "base": "find",
+    "pastSimple": "found",
+    "pastParticiple": "found"
+  },
+  {
+    "base": "flee",
+    "pastSimple": "fled",
+    "pastParticiple": "fled"
+  },
+  {
+    "base": "fling",
+    "pastSimple": "flung",
+    "pastParticiple": "flung"
+  },
+  {
+    "base": "fly",
+    "pastSimple": "flew",
+    "pastParticiple": "flown"
+  },
+  {
+    "base": "forbid",
+    "pastSimple": "forbade",
+    "pastParticiple": "forbidden"
+  },
+  {
+    "base": "forget",
+    "pastSimple": "forgot",
+    "pastParticiple": "forgotten"
+  },
+  {
+    "base": "forgive",
+    "pastSimple": "forgave",
+    "pastParticiple": "forgiven"
+  },
+  {
+    "base": "freeze",
+    "pastSimple": "froze",
+    "pastParticiple": "frozen"
+  },
+  {
+    "base": "get",
+    "pastSimple": "got",
+    "pastParticiple": "gotten"
+  },
+  {
+    "base": "give",
+    "pastSimple": "gave",
+    "pastParticiple": "given"
+  },
+  {
+    "base": "go",
+    "pastSimple": "went",
+    "pastParticiple": "gone"
+  },
+  {
+    "base": "grind",
+    "pastSimple": "ground",
+    "pastParticiple": "ground"
+  },
+  {
+    "base": "grow",
+    "pastSimple": "grew",
+    "pastParticiple": "grown"
+  },
+  {
+    "base": "have",
+    "pastSimple": "had",
+    "pastParticiple": "had"
+  },
+  {
+    "base": "hear",
+    "pastSimple": "heard",
+    "pastParticiple": "heard"
+  },
+  {
+    "base": "hide",
+    "pastSimple": "hid",
+    "pastParticiple": "hidden"
+  },
+  {
+    "base": "hit",
+    "pastSimple": "hit",
+    "pastParticiple": "hit"
+  },
+  {
+    "base": "hold",
+    "pastSimple": "held",
+    "pastParticiple": "held"
+  },
+  {
+    "base": "hurt",
+    "pastSimple": "hurt",
+    "pastParticiple": "hurt"
+  },
+  {
+    "base": "inlay",
+    "pastSimple": "inlaid",
+    "pastParticiple": "inlaid"
+  },
+  {
+    "base": "input",
+    "pastSimple": "input",
+    "pastParticiple": "input"
+  },
+  {
+    "base": "keep",
+    "pastSimple": "kept",
+    "pastParticiple": "kept"
+  },
+  {
+    "base": "know",
+    "pastSimple": "knew",
+    "pastParticiple": "known"
+  },
+  {
+    "base": "lay",
+    "pastSimple": "laid",
+    "pastParticiple": "laid"
+  },
+  {
+    "base": "lead",
+    "pastSimple": "led",
+    "pastParticiple": "led"
+  },
+  {
+    "base": "leave",
+    "pastSimple": "left",
+    "pastParticiple": "left"
+  },
+  {
+    "base": "lend",
+    "pastSimple": "lent",
+    "pastParticiple": "lent"
+  },
+  {
+    "base": "let",
+    "pastSimple": "let",
+    "pastParticiple": "let"
+  },
+  {
+    "base": "lie",
+    "pastSimple": "lay",
+    "pastParticiple": "lain"
+  },
+  {
+    "base": "light",
+    "pastSimple": "lit",
+    "pastParticiple": "lit"
+  },
+  {
+    "base": "lose",
+    "pastSimple": "lost",
+    "pastParticiple": "lost"
+  },
+  {
+    "base": "make",
+    "pastSimple": "made",
+    "pastParticiple": "made"
+  },
+  {
+    "base": "mean",
+    "pastSimple": "meant",
+    "pastParticiple": "meant"
+  },
+  {
+    "base": "meet",
+    "pastSimple": "met",
+    "pastParticiple": "met"
+  },
+  {
+    "base": "mistake",
+    "pastSimple": "mistook",
+    "pastParticiple": "mistaken"
+  },
+  {
+    "base": "pay",
+    "pastSimple": "paid",
+    "pastParticiple": "paid"
+  },
+  {
+    "base": "prove",
+    "pastSimple": "proved",
+    "pastParticiple": "proven"
+  },
+  {
+    "base": "put",
+    "pastSimple": "put",
+    "pastParticiple": "put"
+  },
+  {
+    "base": "quit",
+    "pastSimple": "quit",
+    "pastParticiple": "quit"
+  },
+  {
+    "base": "read",
+    "pastSimple": "read",
+    "pastParticiple": "read"
+  },
+  {
+    "base": "rid",
+    "pastSimple": "rid",
+    "pastParticiple": "rid"
+  },
+  {
+    "base": "ride",
+    "pastSimple": "rode",
+    "pastParticiple": "ridden"
+  },
+  {
+    "base": "ring",
+    "pastSimple": "rang",
+    "pastParticiple": "rung"
+  },
+  {
+    "base": "rise",
+    "pastSimple": "rose",
+    "pastParticiple": "risen"
+  },
+  {
+    "base": "run",
+    "pastSimple": "ran",
+    "pastParticiple": "run"
+  },
+  {
+    "base": "say",
+    "pastSimple": "said",
+    "pastParticiple": "said"
+  },
+  {
+    "base": "see",
+    "pastSimple": "saw",
+    "pastParticiple": "seen"
+  },
+  {
+    "base": "seek",
+    "pastSimple": "sought",
+    "pastParticiple": "sought"
+  },
+  {
+    "base": "sell",
+    "pastSimple": "sold",
+    "pastParticiple": "sold"
+  },
+  {
+    "base": "send",
+    "pastSimple": "sent",
+    "pastParticiple": "sent"
+  },
+  {
+    "base": "set",
+    "pastSimple": "set",
+    "pastParticiple": "set"
+  },
+  {
+    "base": "shake",
+    "pastSimple": "shook",
+    "pastParticiple": "shaken"
+  },
+  {
+    "base": "shave",
+    "pastSimple": "shaved",
+    "pastParticiple": "shaven"
+  },
+  {
+    "base": "shed",
+    "pastSimple": "shed",
+    "pastParticiple": "shed"
+  },
+  {
+    "base": "shine",
+    "pastSimple": "shone",
+    "pastParticiple": "shone"
+  },
+  {
+    "base": "shoot",
+    "pastSimple": "shot",
+    "pastParticiple": "shot"
+  },
+  {
+    "base": "show",
+    "pastSimple": "showed",
+    "pastParticiple": "shown"
+  },
+  {
+    "base": "shrink",
+    "pastSimple": "shrank",
+    "pastParticiple": "shrunk"
+  },
+  {
+    "base": "shut",
+    "pastSimple": "shut",
+    "pastParticiple": "shut"
+  },
+  {
+    "base": "sing",
+    "pastSimple": "sang",
+    "pastParticiple": "sung"
+  },
+  {
+    "base": "sink",
+    "pastSimple": "sank",
+    "pastParticiple": "sunk"
+  },
+  {
+    "base": "sit",
+    "pastSimple": "sat",
+    "pastParticiple": "sat"
+  },
+  {
+    "base": "slay",
+    "pastSimple": "slew",
+    "pastParticiple": "slain"
+  },
+  {
+    "base": "sleep",
+    "pastSimple": "slept",
+    "pastParticiple": "slept"
+  },
+  {
+    "base": "slide",
+    "pastSimple": "slid",
+    "pastParticiple": "slid"
+  },
+  {
+    "base": "sling",
+    "pastSimple": "slung",
+    "pastParticiple": "slung"
+  },
+  {
+    "base": "slit",
+    "pastSimple": "slit",
+    "pastParticiple": "slit"
+  },
+  {
+    "base": "sow",
+    "pastSimple": "sowed",
+    "pastParticiple": "sown"
+  },
+  {
+    "base": "speak",
+    "pastSimple": "spoke",
+    "pastParticiple": "spoken"
+  },
+  {
+    "base": "speed",
+    "pastSimple": "sped",
+    "pastParticiple": "sped"
+  },
+  {
+    "base": "spell",
+    "pastSimple": "spelt",
+    "pastParticiple": "spelt"
+  },
+  {
+    "base": "spend",
+    "pastSimple": "spent",
+    "pastParticiple": "spent"
+  },
+
+  {
+    "base": "spin",
+    "pastSimple": "spun",
+    "pastParticiple": "spun"
+  },
+  {
+    "base": "spit",
+    "pastSimple": "spat",
+    "pastParticiple": "spat"
+  },
+  {
+    "base": "split",
+    "pastSimple": "split",
+    "pastParticiple": "split"
+  },
+  {
+    "base": "spread",
+    "pastSimple": "spread",
+    "pastParticiple": "spread"
+  },
+  {
+    "base": "spring",
+    "pastSimple": "sprang",
+    "pastParticiple": "sprung"
+  },
+  {
+    "base": "stand",
+    "pastSimple": "stood",
+    "pastParticiple": "stood"
+  },
+  {
+    "base": "steal",
+    "pastSimple": "stole",
+    "pastParticiple": "stolen"
+  },
+  {
+    "base": "stick",
+    "pastSimple": "stuck",
+    "pastParticiple": "stuck"
+  },
+  {
+    "base": "sting",
+    "pastSimple": "stung",
+    "pastParticiple": "stung"
+  },
+  {
+    "base": "stink",
+    "pastSimple": "stank",
+    "pastParticiple": "stunk"
+  },
+  {
+    "base": "strike",
+    "pastSimple": "struck",
+    "pastParticiple": "struck"
+  },
+  {
+    "base": "swear",
+    "pastSimple": "swore",
+    "pastParticiple": "sworn"
+  },
+  {
+    "base": "sweep",
+    "pastSimple": "swept",
+    "pastParticiple": "swept"
+  },
+  {
+    "base": "swell",
+    "pastSimple": "swelled",
+    "pastParticiple": "swollen"
+  },
+  {
+    "base": "swim",
+    "pastSimple": "swam",
+    "pastParticiple": "swum"
+  },
+  {
+    "base": "swing",
+    "pastSimple": "swung",
+    "pastParticiple": "swung"
+  },
+  {
+    "base": "take",
+    "pastSimple": "took",
+    "pastParticiple": "taken"
+  },
+  {
+    "base": "teach",
+    "pastSimple": "taught",
+    "pastParticiple": "taught"
+  },
+  {
+    "base": "tear",
+    "pastSimple": "tore",
+    "pastParticiple": "torn"
+  },
+  {
+    "base": "tell",
+    "pastSimple": "told",
+    "pastParticiple": "told"
+  },
+  {
+    "base": "think",
+    "pastSimple": "thought",
+    "pastParticiple": "thought"
+  },
+  {
+    "base": "throw",
+    "pastSimple": "threw",
+    "pastParticiple": "thrown"
+  },
+  {
+    "base": "thrust",
+    "pastSimple": "thrust",
+    "pastParticiple": "thrust"
+  },
+  {
+    "base": "wake",
+    "pastSimple": "woke",
+    "pastParticiple": "woken"
+  },
+  {
+    "base": "wear",
+    "pastSimple": "wore",
+    "pastParticiple": "worn"
+  },
+  {
+    "base": "weep",
+    "pastSimple": "wept",
+    "pastParticiple": "wept"
+  },
+  {
+    "base": "win",
+    "pastSimple": "won",
+    "pastParticiple": "won"
+  },
+  {
+    "base": "wind",
+    "pastSimple": "wound",
+    "pastParticiple": "wound"
+  },
+  {
+    "base": "write",
+    "pastSimple": "wrote",
+    "pastParticiple": "written"
+  }
+]
