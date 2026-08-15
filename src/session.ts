@@ -4,6 +4,7 @@ export type Session = {
   mode: QuizMode;
   current: IrregularVerb;
   awaitingReview: boolean;
+  questionMessageId?: number;
 };
 
 const sessions = new Map<number, Session>();
