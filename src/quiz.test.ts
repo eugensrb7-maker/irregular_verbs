@@ -8,6 +8,7 @@ import {
   formatAnswer,
 } from "./quiz.js";
 import type { IrregularVerb } from "./verbs.js";
+import { getVerbContexts } from "./verb-contexts.js";
 
 const stick: IrregularVerb = {
   base: "stick",
@@ -16,8 +17,16 @@ const stick: IrregularVerb = {
 };
 
 describe("quiz questions", () => {
+  it("provides unique second- and third-form contexts", () => {
+    const contexts = getVerbContexts(stick);
+
+    assert.notEqual(contexts.pastSimple, contexts.pastParticiple);
+    assert.match(contexts.pastSimple, /____/);
+    assert.match(contexts.pastParticiple, /____/);
+  });
+
   it("builds context questions with a visible blank and form label", () => {
-    const question = buildQuestion(stick, "verbs-in-context");
+    const question = buildQuestion(stick, "verbs-in-context", "pastSimple");
 
     assert.match(question, /STICK/);
     assert.match(question, /second form/);
@@ -25,14 +34,18 @@ describe("quiz questions", () => {
   });
 
   it("fills the context blank after a correct answer", () => {
-    const question = buildAnsweredContextQuestion(stick);
+    const question = buildAnsweredContextQuestion(stick, "pastSimple");
 
     assert.match(question, /\*stuck\*/);
     assert.doesNotMatch(question, /____/);
   });
 
   it("appends wrong-answer feedback to the original question", () => {
-    const question = buildWrongQuestion(stick, "verbs-in-context");
+    const question = buildWrongQuestion(
+      stick,
+      "verbs-in-context",
+      "pastSimple"
+    );
 
     assert.match(question, /\\_\\_\\_\\_/);
     assert.match(question, /Wrong\. Answer: \*stuck\*$/);
@@ -46,14 +59,23 @@ describe("quiz answers", () => {
   });
 
   it("checks the requested form in context mode", () => {
-    assert.equal(checkAnswer(stick, "verbs-in-context", "STUCK"), true);
-    assert.equal(checkAnswer(stick, "verbs-in-context", "stick"), false);
+    assert.equal(
+      checkAnswer(stick, "verbs-in-context", "STUCK", "pastSimple"),
+      true
+    );
+    assert.equal(
+      checkAnswer(stick, "verbs-in-context", "stick", "pastSimple"),
+      false
+    );
   });
 
   it("formats answers for every mode", () => {
     assert.equal(formatAnswer(stick, "base-to-forms"), "stuck stuck");
     assert.equal(formatAnswer(stick, "past-to-base"), "stick");
     assert.equal(formatAnswer(stick, "participle-to-base"), "stick");
-    assert.equal(formatAnswer(stick, "verbs-in-context"), "stuck");
+    assert.equal(
+      formatAnswer(stick, "verbs-in-context", "pastParticiple"),
+      "stuck"
+    );
   });
 });

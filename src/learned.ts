@@ -2,8 +2,14 @@ import { readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { IrregularVerb } from "./verbs.js";
+import type { VerbForm } from "./verb-contexts.js";
 
-type ProgressFile = Record<string, { learned: string[] }>;
+type ChatProgress = {
+  learned: string[];
+  learnedForms?: string[];
+};
+
+type ProgressFile = Record<string, ChatProgress>;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const progressPath = join(__dirname, "..", "data", "progress.json");
@@ -26,33 +32,76 @@ export function getLearnedBases(chatId: number): Set<string> {
   return new Set(progress[String(chatId)]?.learned ?? []);
 }
 
+function formProgressKey(base: string, form: VerbForm): string {
+  return `${base}:${form}`;
+}
+
+export function isVerbFormLearned(
+  chatId: number,
+  base: string,
+  form: VerbForm
+): boolean {
+  const learnedForms = progress[String(chatId)]?.learnedForms ?? [];
+  return learnedForms.includes(formProgressKey(base, form));
+}
+
 function saveProgress(): void {
   writeFileSync(temporaryProgressPath, `${JSON.stringify(progress, null, 2)}\n`);
   renameSync(temporaryProgressPath, progressPath);
 }
 
-function updateLearned(
+function updateChatProgress(
   chatId: number,
-  base: string,
-  learnedStatus: boolean
+  update: (current: ChatProgress) => ChatProgress
 ): void {
-  const learned = getLearnedBases(chatId);
-  if (learnedStatus) {
-    learned.add(base);
-  } else {
-    learned.delete(base);
-  }
-  progress[String(chatId)] = { learned: [...learned].sort() };
+  const chatKey = String(chatId);
+  const current = progress[chatKey] ?? { learned: [] };
+  progress[chatKey] = update(current);
   saveProgress();
 }
 
+export function markVerbFormLearned(
+  chatId: number,
+  base: string,
+  form: VerbForm
+): void {
+  updateChatProgress(chatId, (current) => {
+    const learnedForms = new Set(current.learnedForms ?? []);
+    learnedForms.add(formProgressKey(base, form));
+    return {
+      ...current,
+      learnedForms: [...learnedForms].sort(),
+    };
+  });
+}
+
 export function markLearned(chatId: number, base: string): void {
-  updateLearned(chatId, base, true);
+  updateChatProgress(chatId, (current) => {
+    const learned = new Set(current.learned);
+    learned.add(base);
+    return { ...current, learned: [...learned].sort() };
+  });
 }
 
 export function toggleLearned(chatId: number, base: string): boolean {
   const learnedStatus = !getLearnedBases(chatId).has(base);
-  updateLearned(chatId, base, learnedStatus);
+  updateChatProgress(chatId, (current) => {
+    const learned = new Set(current.learned);
+    if (learnedStatus) {
+      learned.add(base);
+      return { ...current, learned: [...learned].sort() };
+    }
+
+    learned.delete(base);
+    return {
+      ...current,
+      learned: [...learned].sort(),
+      learnedForms: current.learnedForms?.filter(
+        (key) => !key.startsWith(`${base}:`)
+      ),
+    };
+  });
+
   return learnedStatus;
 }
 

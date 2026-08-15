@@ -1,11 +1,25 @@
 import type { IrregularVerb, QuizMode } from "./verbs.js";
+import type { VerbForm } from "./verb-contexts.js";
 
-export type Session = {
-  mode: QuizMode;
+type SessionState = {
   current: IrregularVerb;
   awaitingReview: boolean;
   questionMessageId?: number;
 };
+
+export type ContextSession = SessionState & {
+  mode: "verbs-in-context";
+  contextForm: VerbForm;
+};
+
+type StandardQuizMode = Exclude<QuizMode, "verbs-in-context">;
+
+export type StandardSession = SessionState & {
+  mode: StandardQuizMode;
+  contextForm?: never;
+};
+
+export type Session = ContextSession | StandardSession;
 
 const sessions = new Map<number, Session>();
 

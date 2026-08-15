@@ -3,6 +3,7 @@ import {
   contextAnswer,
   contextFormLabel,
   getVerbContext,
+  type VerbForm,
 } from "./verb-contexts.js";
 
 const CONTEXT_PLACEHOLDER = "____";
@@ -19,7 +20,11 @@ export function pickRandomVerb(
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-export function buildQuestion(verb: IrregularVerb, mode: QuizMode): string {
+export function buildQuestion(
+  verb: IrregularVerb,
+  mode: QuizMode,
+  contextForm?: VerbForm
+): string {
   switch (mode) {
     case "base-to-forms":
       return (
@@ -31,8 +36,9 @@ export function buildQuestion(verb: IrregularVerb, mode: QuizMode): string {
     case "participle-to-base":
       return `What is the base form of *${escapeMarkdown(verb.pastParticiple)}*?`;
     case "verbs-in-context": {
-      const context = getVerbContext(verb);
-      return contextQuestionHeader(verb) +
+      const form = requireContextForm(contextForm);
+      const context = getVerbContext(verb, form);
+      return contextQuestionHeader(verb, form) +
         context.sentence.replace(CONTEXT_PLACEHOLDER, VISIBLE_CONTEXT_BLANK);
     }
   }
@@ -40,23 +46,31 @@ export function buildQuestion(verb: IrregularVerb, mode: QuizMode): string {
 
 export function buildWrongQuestion(
   verb: IrregularVerb,
-  mode: QuizMode
+  mode: QuizMode,
+  contextForm?: VerbForm
 ): string {
   return (
-    `${buildQuestion(verb, mode)}\n\n` +
-    `Wrong. Answer: *${escapeMarkdown(formatAnswer(verb, mode))}*`
+    `${buildQuestion(verb, mode, contextForm)}\n\n` +
+    `Wrong. Answer: *${escapeMarkdown(formatAnswer(verb, mode, contextForm))}*`
   );
 }
 
-export function buildAnsweredContextQuestion(verb: IrregularVerb): string {
-  const context = getVerbContext(verb);
+export function buildAnsweredContextQuestion(
+  verb: IrregularVerb,
+  form: VerbForm
+): string {
+  const context = getVerbContext(verb, form);
   const answer = escapeMarkdown(splitVariants(contextAnswer(verb, context.form))[0]);
   const sentence = context.sentence.replace(CONTEXT_PLACEHOLDER, `*${answer}*`);
 
-  return `${contextQuestionHeader(verb)}🥳 ${sentence} 🥳`;
+  return `${contextQuestionHeader(verb, form)}🥳 ${sentence} 🥳`;
 }
 
-export function formatAnswer(verb: IrregularVerb, mode: QuizMode): string {
+export function formatAnswer(
+  verb: IrregularVerb,
+  mode: QuizMode,
+  contextForm?: VerbForm
+): string {
   switch (mode) {
     case "base-to-forms":
       return `${verb.pastSimple} ${verb.pastParticiple}`;
@@ -64,8 +78,7 @@ export function formatAnswer(verb: IrregularVerb, mode: QuizMode): string {
     case "participle-to-base":
       return verb.base;
     case "verbs-in-context": {
-      const context = getVerbContext(verb);
-      return contextAnswer(verb, context.form);
+      return contextAnswer(verb, requireContextForm(contextForm));
     }
   }
 }
@@ -86,7 +99,8 @@ function matchesAny(input: string, expected: string): boolean {
 export function checkAnswer(
   verb: IrregularVerb,
   mode: QuizMode,
-  userInput: string
+  userInput: string,
+  contextForm?: VerbForm
 ): boolean {
   if (mode === "base-to-forms") {
     const parts = userInput.trim().split(/\s+/).map(normalize).filter(Boolean);
@@ -100,12 +114,18 @@ export function checkAnswer(
     );
   }
 
-  return matchesAny(userInput, formatAnswer(verb, mode));
+  return matchesAny(userInput, formatAnswer(verb, mode, contextForm));
 }
 
-function contextQuestionHeader(verb: IrregularVerb): string {
-  const { form } = getVerbContext(verb);
+function contextQuestionHeader(verb: IrregularVerb, form: VerbForm): string {
   return `*${escapeMarkdown(verb.base.toUpperCase())}* (${contextFormLabel(form)})\n\n`;
+}
+
+function requireContextForm(form?: VerbForm): VerbForm {
+  if (!form) {
+    throw new Error("Context form is required in verbs-in-context mode.");
+  }
+  return form;
 }
 
 function escapeMarkdown(text: string): string {
