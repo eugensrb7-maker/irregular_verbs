@@ -20,7 +20,9 @@ import {
 import {
   excludeLearned,
   getLearnedBases,
+  isVerbFormLearned,
   markLearned,
+  markVerbFormLearned,
   toggleLearned,
 } from "./learned.js";
 import {
@@ -34,6 +36,10 @@ import {
   type IrregularVerb,
   type QuizMode,
 } from "./verbs.js";
+import {
+  VERB_FORMS,
+  type VerbForm,
+} from "./verb-contexts.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const verbsPath = join(__dirname, "..", "data", "verbs.json");
@@ -72,31 +78,62 @@ function startQuiz(
   chatId: number,
   mode: QuizMode = DEFAULT_QUIZ_MODE
 ): Session {
-  const pool = getStudyPool(chatId);
+  const pool = getStudyPool(chatId, mode);
   const verb = pickRandomVerb(pool);
-  const session: Session = {
-    mode,
-    current: verb,
-    awaitingReview: false,
-  };
+  const session: Session =
+    mode === "verbs-in-context"
+      ? {
+          mode,
+          current: verb,
+          awaitingReview: false,
+          contextForm: pickContextForm(chatId, verb),
+        }
+      : { mode, current: verb, awaitingReview: false };
   setSession(chatId, session);
   return session;
 }
 
-function getStudyPool(chatId: number): IrregularVerb[] {
-  return excludeLearned(chatId, verbs);
+function getStudyPool(
+  chatId: number,
+  mode: QuizMode = DEFAULT_QUIZ_MODE
+): IrregularVerb[] {
+  const activeVerbs = excludeLearned(chatId, verbs);
+  if (mode !== "verbs-in-context") {
+    return activeVerbs;
+  }
+
+  return activeVerbs.filter((verb) => {
+    return availableContextForms(chatId, verb).length > 0;
+  });
+}
+
+function availableContextForms(
+  chatId: number,
+  verb: IrregularVerb
+): VerbForm[] {
+  return VERB_FORMS.filter(
+    (form) => !isVerbFormLearned(chatId, verb.base, form)
+  );
+}
+
+function pickContextForm(chatId: number, verb: IrregularVerb): VerbForm {
+  const forms = availableContextForms(chatId, verb);
+  return forms[Math.floor(Math.random() * forms.length)];
 }
 
 function advanceSession(
   chatId: number,
   session: NonNullable<ReturnType<typeof getSession>>
 ) {
-  const pool = getStudyPool(chatId);
+  const pool = getStudyPool(chatId, session.mode);
   if (pool.length === 0) {
     return undefined;
   }
   const next = pickRandomVerb(pool, session.current);
   session.current = next;
+  if (session.mode === "verbs-in-context") {
+    session.contextForm = pickContextForm(chatId, next);
+  }
   return next;
 }
 
@@ -111,7 +148,7 @@ async function replyWithCurrentQuestion(
   session: Session
 ): Promise<void> {
   const message = await ctx.reply(
-    buildQuestion(session.current, session.mode),
+    buildQuestion(session.current, session.mode, session.contextForm),
     { parse_mode: MARKDOWN_PARSE_MODE }
   );
   session.questionMessageId = message.message_id;
@@ -162,7 +199,7 @@ async function handleCorrectAnswer(
     await ctx.api.editMessageText(
       chatId,
       session.questionMessageId,
-      buildAnsweredContextQuestion(session.current),
+      buildAnsweredContextQuestion(session.current, session.contextForm),
       { parse_mode: MARKDOWN_PARSE_MODE }
     );
   }
@@ -184,11 +221,13 @@ async function handleWrongAnswer(
     await ctx.api.editMessageText(
       chatId,
       session.questionMessageId,
-      buildWrongQuestion(answeredVerb, session.mode),
+      buildWrongQuestion(answeredVerb, session.mode, session.contextForm),
       { parse_mode: MARKDOWN_PARSE_MODE }
     );
   } else {
-    await ctx.reply(`Wrong. Answer: ${formatAnswer(answeredVerb, session.mode)}`);
+    await ctx.reply(
+      `Wrong. Answer: ${formatAnswer(answeredVerb, session.mode, session.contextForm)}`
+    );
   }
 
   advanceSession(chatId, session);
@@ -260,24 +299,27 @@ bot.callbackQuery(/^mode:(.+)$/, async (ctx) => {
     return;
   }
 
-  const pool = getStudyPool(chatId);
+  const mode = ctx.match[1];
+  if (!isQuizMode(mode)) {
+    await ctx.answerCallbackQuery({ text: "Unknown quiz mode." });
+    return;
+  }
+
+  const pool = getStudyPool(chatId, mode);
   if (pool.length === 0) {
     await ctx.answerCallbackQuery({
       text: "Restore at least one verb with /verbs",
     });
     return;
   }
-
-  const mode = ctx.match[1];
-  if (!isQuizMode(mode)) {
-    await ctx.answerCallbackQuery({ text: "Unknown quiz mode." });
-    return;
-  }
   const session = startQuiz(chatId, mode);
   await ctx.answerCallbackQuery({ text: QUIZ_MODE_LABELS[mode] });
-  await ctx.editMessageText(buildQuestion(session.current, session.mode), {
-    parse_mode: MARKDOWN_PARSE_MODE,
-  });
+  await ctx.editMessageText(
+    buildQuestion(session.current, session.mode, session.contextForm),
+    {
+      parse_mode: MARKDOWN_PARSE_MODE,
+    }
+  );
   session.questionMessageId = ctx.callbackQuery.message?.message_id;
 });
 
@@ -337,7 +379,11 @@ bot.callbackQuery(/^review:(again|learned)$/, async (ctx) => {
   }
 
   if (ctx.match[1] === "learned") {
-    markLearned(chatId, session.current.base);
+    if (session.mode === "verbs-in-context") {
+      markVerbFormLearned(chatId, session.current.base, session.contextForm);
+    } else {
+      markLearned(chatId, session.current.base);
+    }
   }
   session.awaitingReview = false;
 
@@ -371,14 +417,19 @@ bot.on("message:text", async (ctx) => {
     return;
   }
 
-  const pool = getStudyPool(ctx.chat.id);
+  const pool = getStudyPool(ctx.chat.id, session.mode);
   if (pool.length === 0) {
     await ctx.reply(NO_ACTIVE_VERBS_MESSAGE);
     clearSession(ctx.chat.id);
     return;
   }
 
-  const ok = checkAnswer(session.current, session.mode, ctx.message.text);
+  const ok = checkAnswer(
+    session.current,
+    session.mode,
+    ctx.message.text,
+    session.contextForm
+  );
   if (ok) {
     await handleCorrectAnswer(ctx, ctx.chat.id, session);
     return;
