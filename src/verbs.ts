@@ -7,10 +7,12 @@ export type IrregularVerb = {
 export type QuizMode =
   | "base-to-forms"
   | "past-to-base"
-  | "participle-to-base";
+  | "participle-to-base"
+  | "verbs-in-context";
 
 export const QUIZ_MODE_LABELS: Record<QuizMode, string> = {
   "base-to-forms": "Base → past / participle",
   "past-to-base": "Past simple → base",
   "participle-to-base": "Participle → base",
+  "verbs-in-context": "Verbs in context",
 };

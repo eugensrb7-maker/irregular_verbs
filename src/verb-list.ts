@@ -2,6 +2,8 @@ import { InlineKeyboard } from "grammy";
 import type { IrregularVerb } from "./verbs.js";
 
 export const VERBS_PAGE_SIZE = 8;
+const TELEGRAM_MESSAGE_LIMIT = 4096;
+const MESSAGE_FOOTER_RESERVE = 80;
 
 function totalPages(verbCount: number): number {
   return Math.max(1, Math.ceil(verbCount / VERBS_PAGE_SIZE));
@@ -15,7 +17,18 @@ export function formatVerbLine(
   return `${mark} ${verb.base} — ${verb.pastSimple} — ${verb.pastParticiple}`;
 }
 
-const TELEGRAM_MESSAGE_LIMIT = 4096;
+function countVerbStatuses(
+  verbs: IrregularVerb[],
+  learned: Set<string>
+): { active: number; learned: number } {
+  let learnedCount = 0;
+  for (const verb of verbs) {
+    if (learned.has(verb.base)) {
+      learnedCount += 1;
+    }
+  }
+  return { active: verbs.length - learnedCount, learned: learnedCount };
+}
 
 export function splitFullListMessages(
   verbs: IrregularVerb[],
@@ -32,7 +45,10 @@ export function splitFullListMessages(
 
   for (const line of lines) {
     const next = chunkLines === 0 ? `${chunk}${line}` : `${chunk}\n${line}`;
-    if (next.length > TELEGRAM_MESSAGE_LIMIT - 80 && chunkLines > 0) {
+    if (
+      next.length > TELEGRAM_MESSAGE_LIMIT - MESSAGE_FOOTER_RESERVE &&
+      chunkLines > 0
+    ) {
       messages.push(chunk);
       chunk = line;
       chunkLines = 1;
@@ -46,10 +62,9 @@ export function splitFullListMessages(
     messages.push(chunk);
   }
 
-  const activeCount = verbs.filter((v) => !learned.has(v.base)).length;
-  const learnedCount = verbs.filter((v) => learned.has(v.base)).length;
+  const counts = countVerbStatuses(verbs, learned);
   const lastIndex = messages.length - 1;
-  messages[lastIndex] += footer(activeCount, learnedCount);
+  messages[lastIndex] += footer(counts.active, counts.learned);
 
   return messages;
 }
@@ -59,13 +74,12 @@ export function buildPickerMessage(
   learned: Set<string>,
   page: number
 ): string {
-  const activeCount = verbs.filter((v) => !learned.has(v.base)).length;
-  const learnedCount = verbs.filter((v) => learned.has(v.base)).length;
+  const counts = countVerbStatuses(verbs, learned);
   const pages = totalPages(verbs.length);
   const safePage = Math.min(page, pages - 1);
 
   return (
-    `*Verb selection* (${activeCount} active · ${learnedCount} learned)\n\n` +
+    `*Verb selection* (${counts.active} active · ${counts.learned} learned)\n\n` +
     "✓ active · 🎓 learned\n" +
     "Tap a verb to switch between active and learned.\n" +
     `Page ${safePage + 1}/${pages}`

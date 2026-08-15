@@ -2,14 +2,21 @@ import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { Bot, InlineKeyboard } from "grammy";
+import { Bot, InlineKeyboard, type Context } from "grammy";
 import {
+  buildAnsweredContextQuestion,
   buildQuestion,
+  buildWrongQuestion,
   checkAnswer,
   formatAnswer,
   pickRandomVerb,
 } from "./quiz.js";
-import { clearSession, getSession, setSession } from "./session.js";
+import {
+  clearSession,
+  getSession,
+  setSession,
+  type Session,
+} from "./session.js";
 import {
   excludeLearned,
   getLearnedBases,
@@ -31,6 +38,20 @@ import {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const verbsPath = join(__dirname, "..", "data", "verbs.json");
 const verbs: IrregularVerb[] = JSON.parse(readFileSync(verbsPath, "utf-8"));
+const DEFAULT_QUIZ_MODE: QuizMode = "verbs-in-context";
+const MARKDOWN_PARSE_MODE = "Markdown" as const;
+const NO_ACTIVE_VERBS_MESSAGE =
+  "No active verbs remain. Use /verbs to restore a learned verb.";
+const QUIZ_MODES = Object.keys(QUIZ_MODE_LABELS) as QuizMode[];
+const BOT_COMMANDS = [
+  { command: "study", description: "start a quiz" },
+  { command: "mode", description: "choose quiz mode" },
+  { command: "verbs", description: "view all verbs and choose which to study" },
+  {
+    command: "list",
+    description: `show the full verb list (${verbs.length} verbs)`,
+  },
+] as const;
 
 const token = process.env.BOT_TOKEN;
 if (!token) {
@@ -40,23 +61,26 @@ if (!token) {
 const bot = new Bot(token);
 
 function modeKeyboard(): InlineKeyboard {
-  return new InlineKeyboard()
-    .text(QUIZ_MODE_LABELS["base-to-forms"], "mode:base-to-forms")
-    .row()
-    .text(QUIZ_MODE_LABELS["past-to-base"], "mode:past-to-base")
-    .row()
-    .text(QUIZ_MODE_LABELS["participle-to-base"], "mode:participle-to-base");
+  const keyboard = new InlineKeyboard();
+  for (const mode of QUIZ_MODES) {
+    keyboard.text(QUIZ_MODE_LABELS[mode], `mode:${mode}`).row();
+  }
+  return keyboard;
 }
 
-function startQuiz(chatId: number, mode: QuizMode = "base-to-forms") {
+function startQuiz(
+  chatId: number,
+  mode: QuizMode = DEFAULT_QUIZ_MODE
+): Session {
   const pool = getStudyPool(chatId);
   const verb = pickRandomVerb(pool);
-  setSession(chatId, {
+  const session: Session = {
     mode,
     current: verb,
     awaitingReview: false,
-  });
-  return buildQuestion(verb, mode);
+  };
+  setSession(chatId, session);
+  return session;
 }
 
 function getStudyPool(chatId: number): IrregularVerb[] {
@@ -80,6 +104,17 @@ function reviewKeyboard(): InlineKeyboard {
   return new InlineKeyboard()
     .text("Show again", "review:again")
     .text("I'm done with it", "review:learned");
+}
+
+async function replyWithCurrentQuestion(
+  ctx: Pick<Context, "reply">,
+  session: Session
+): Promise<void> {
+  const message = await ctx.reply(
+    buildQuestion(session.current, session.mode),
+    { parse_mode: MARKDOWN_PARSE_MODE }
+  );
+  session.questionMessageId = message.message_id;
 }
 
 function resolveChatId(ctx: {
@@ -108,6 +143,58 @@ function pickerContent(chatId: number, page: number) {
   ] as const;
 }
 
+async function sendFullList(
+  ctx: Pick<Context, "reply">,
+  chatId: number
+): Promise<void> {
+  const learned = getLearnedBases(chatId);
+  for (const message of splitFullListMessages(verbs, learned)) {
+    await ctx.reply(message, { parse_mode: MARKDOWN_PARSE_MODE });
+  }
+}
+
+async function handleCorrectAnswer(
+  ctx: Pick<Context, "api" | "reply">,
+  chatId: number,
+  session: Session
+): Promise<void> {
+  if (session.mode === "verbs-in-context" && session.questionMessageId) {
+    await ctx.api.editMessageText(
+      chatId,
+      session.questionMessageId,
+      buildAnsweredContextQuestion(session.current),
+      { parse_mode: MARKDOWN_PARSE_MODE }
+    );
+  }
+
+  session.awaitingReview = true;
+  await ctx.reply(
+    "Correct!\n\nDo you want to see this verb again, or have you learned it?",
+    { reply_markup: reviewKeyboard() }
+  );
+}
+
+async function handleWrongAnswer(
+  ctx: Pick<Context, "api" | "reply">,
+  chatId: number,
+  session: Session
+): Promise<void> {
+  const answeredVerb = session.current;
+  if (session.questionMessageId) {
+    await ctx.api.editMessageText(
+      chatId,
+      session.questionMessageId,
+      buildWrongQuestion(answeredVerb, session.mode),
+      { parse_mode: MARKDOWN_PARSE_MODE }
+    );
+  } else {
+    await ctx.reply(`Wrong. Answer: ${formatAnswer(answeredVerb, session.mode)}`);
+  }
+
+  advanceSession(chatId, session);
+  await replyWithCurrentQuestion(ctx, session);
+}
+
 async function editPicker(
   ctx: {
     editMessageText: (text: string, extra?: object) => Promise<unknown>;
@@ -126,21 +213,16 @@ bot.command("start", async (ctx) => {
     "Irregular Verbs Study Bot\n\n" +
       "Commands:\n" +
       "/study — start a quiz\n" +
-      "/verbs — view all verbs and choose which to study\n" +
-      `/list — show the full verb list (${verbs.length} verbs)\n` +
       "/mode — choose quiz mode\n" +
-      "/stop — end the session\n\n" +
-      "Default mode: base form → past simple / past participle\n",
-    { parse_mode: "Markdown" }
+      "/verbs — view all verbs and choose which to study\n" +
+      `/list — show the full verb list (${verbs.length} verbs)\n\n` +
+      "Default mode: Verbs in context\n",
+    { parse_mode: MARKDOWN_PARSE_MODE }
   );
 });
 
 bot.command("list", async (ctx) => {
-  const learned = getLearnedBases(ctx.chat.id);
-  const messages = splitFullListMessages(verbs, learned);
-  for (const message of messages) {
-    await ctx.reply(message, { parse_mode: "Markdown" });
-  }
+  await sendFullList(ctx, ctx.chat.id);
 });
 
 bot.command("verbs", async (ctx) => {
@@ -150,13 +232,11 @@ bot.command("verbs", async (ctx) => {
 bot.command("study", async (ctx) => {
   const pool = getStudyPool(ctx.chat.id);
   if (pool.length === 0) {
-    await ctx.reply(
-      "No active verbs remain. Use /verbs to restore a learned verb."
-    );
+    await ctx.reply(NO_ACTIVE_VERBS_MESSAGE);
     return;
   }
-  const question = startQuiz(ctx.chat.id);
-  await ctx.reply(question, { parse_mode: "Markdown" });
+  const session = startQuiz(ctx.chat.id);
+  await replyWithCurrentQuestion(ctx, session);
 });
 
 bot.command("mode", async (ctx) => {
@@ -193,12 +273,12 @@ bot.callbackQuery(/^mode:(.+)$/, async (ctx) => {
     await ctx.answerCallbackQuery({ text: "Unknown quiz mode." });
     return;
   }
-  const question = startQuiz(chatId, mode);
+  const session = startQuiz(chatId, mode);
   await ctx.answerCallbackQuery({ text: QUIZ_MODE_LABELS[mode] });
-  await ctx.editMessageText(
-    `Mode set to: ${QUIZ_MODE_LABELS[mode]}\n\n${question}`,
-    { parse_mode: "Markdown" }
-  );
+  await ctx.editMessageText(buildQuestion(session.current, session.mode), {
+    parse_mode: MARKDOWN_PARSE_MODE,
+  });
+  session.questionMessageId = ctx.callbackQuery.message?.message_id;
 });
 
 bot.callbackQuery(/^verbs:page:(\d+)$/, async (ctx) => {
@@ -239,12 +319,8 @@ bot.callbackQuery("verbs:fulllist", async (ctx) => {
     return;
   }
 
-  const learned = getLearnedBases(chatId);
   await ctx.answerCallbackQuery();
-  const messages = splitFullListMessages(verbs, learned);
-  for (const message of messages) {
-    await ctx.reply(message, { parse_mode: "Markdown" });
-  }
+  await sendFullList(ctx, chatId);
 });
 
 bot.callbackQuery(/^review:(again|learned)$/, async (ctx) => {
@@ -277,7 +353,7 @@ bot.callbackQuery(/^review:(again|learned)$/, async (ctx) => {
     return;
   }
 
-  await ctx.reply(buildQuestion(next, session.mode), { parse_mode: "Markdown" });
+  await replyWithCurrentQuestion(ctx, session);
 });
 
 bot.on("message:text", async (ctx) => {
@@ -297,34 +373,26 @@ bot.on("message:text", async (ctx) => {
 
   const pool = getStudyPool(ctx.chat.id);
   if (pool.length === 0) {
-    await ctx.reply(
-      "No active verbs remain. Use /verbs to restore a learned verb."
-    );
+    await ctx.reply(NO_ACTIVE_VERBS_MESSAGE);
     clearSession(ctx.chat.id);
     return;
   }
 
   const ok = checkAnswer(session.current, session.mode, ctx.message.text);
   if (ok) {
-    session.awaitingReview = true;
-    await ctx.reply(
-      "Correct!\n\nDo you want to see this verb again, or have you learned it?",
-      { reply_markup: reviewKeyboard() }
-    );
+    await handleCorrectAnswer(ctx, ctx.chat.id, session);
     return;
   }
 
-  const answer = formatAnswer(session.current, session.mode);
-  const next = advanceSession(ctx.chat.id, session)!;
-  await ctx.reply(
-    `Wrong. Answer: ${answer}\n\n${buildQuestion(next, session.mode)}`,
-    { parse_mode: "Markdown" }
-  );
+  await handleWrongAnswer(ctx, ctx.chat.id, session);
 });
 
 bot.catch((err) => {
   console.error("Bot error:", err);
 });
+
+await bot.api.setMyCommands(BOT_COMMANDS);
+await bot.api.setChatMenuButton({ menu_button: { type: "commands" } });
 
 console.log("Irregular verbs bot is running...");
 bot.start();
